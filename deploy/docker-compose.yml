@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+      target: prod
+    image: politikontroller_app:${POLITIKONTROLLER_APP_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    environment:
+      POLITIKONTROLLER_APP_HOST: 0.0.0.0
+      POLITIKONTROLLER_APP_DB_FILE: /db_data/db.sqlite3
+    volumes:
+    - politikontroller_app-db-data:/db_data/
+
+
+
+volumes:
+  politikontroller_app-db-data:
+    name: politikontroller_app-db-data
