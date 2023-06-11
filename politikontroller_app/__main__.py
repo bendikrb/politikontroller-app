@@ -1,6 +1,6 @@
 import uvicorn
 
-from politikontroller_app.settings import settings
+from .settings import settings
 
 
 def main() -> None:

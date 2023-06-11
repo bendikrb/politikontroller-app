@@ -1,4 +1,4 @@
-FROM python:3.9.6-slim-buster as prod
+FROM python:3.10-slim-buster as prod
 
 
 RUN pip install poetry==1.4.2
@@ -13,7 +13,7 @@ WORKDIR /app/src
 # Installing requirements
 RUN poetry install --only main
 
-# Copying actuall application
+# Copying actual application
 COPY . /app/src/
 RUN poetry install --only main
 

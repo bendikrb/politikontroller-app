@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -38,7 +38,7 @@ async def _create_tables() -> None:  # pragma: no cover
 
 def register_startup_event(
     app: FastAPI,
-) -> Callable[[], Awaitable[None]]:  # pragma: no cover
+) -> Callable[[], Awaitable[None]]:
     """
     Actions to run on application startup.
 
@@ -50,17 +50,16 @@ def register_startup_event(
     """
 
     @app.on_event("startup")
-    async def _startup() -> None:  # noqa: WPS430
+    async def _startup() -> None:
         _setup_db(app)
         await _create_tables()
-        pass  # noqa: WPS420
 
     return _startup
 
 
 def register_shutdown_event(
     app: FastAPI,
-) -> Callable[[], Awaitable[None]]:  # pragma: no cover
+) -> Callable[[], Awaitable[None]]:
     """
     Actions to run on application's shutdown.
 
@@ -69,9 +68,7 @@ def register_shutdown_event(
     """
 
     @app.on_event("shutdown")
-    async def _shutdown() -> None:  # noqa: WPS430
+    async def _shutdown() -> None:
         await app.state.db_engine.dispose()
-
-        pass  # noqa: WPS420
 
     return _shutdown

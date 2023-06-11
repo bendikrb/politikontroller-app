@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.10'
 
 services:
   api:
@@ -15,7 +15,6 @@ services:
       POLITIKONTROLLER_APP_DB_FILE: /db_data/db.sqlite3
     volumes:
     - politikontroller_app-db-data:/db_data/
-
 
 
 volumes:

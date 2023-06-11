@@ -1,5 +1,5 @@
-from typing import Any, AsyncGenerator
-
+from typing import Any
+from collections.abc import AsyncGenerator
 import pytest
 from fastapi import FastAPI
 from httpx import AsyncClient
@@ -10,10 +10,12 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from politikontroller_app.db.dependencies import get_db_session
-from politikontroller_app.db.utils import create_database, drop_database
-from politikontroller_app.settings import settings
-from politikontroller_app.web.application import get_app
+from .shared.dependencies import get_db_session
+from .db.utils import create_database, drop_database
+from .db import meta
+from .db.models import load_all_models
+from .settings import settings
+from .web.application import get_app
 
 
 @pytest.fixture(scope="session")
@@ -33,9 +35,6 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
     :yield: new engine.
     """
-    from politikontroller_app.db.meta import meta  # noqa: WPS433
-    from politikontroller_app.db.models import load_all_models  # noqa: WPS433
-
     load_all_models()
 
     await create_database()
@@ -53,7 +52,7 @@ async def _engine() -> AsyncGenerator[AsyncEngine, None]:
 
 @pytest.fixture
 async def dbsession(
-    _engine: AsyncEngine,
+        _engine: AsyncEngine,
 ) -> AsyncGenerator[AsyncSession, None]:
     """
     Get session to database.
@@ -83,7 +82,7 @@ async def dbsession(
 
 @pytest.fixture
 def fastapi_app(
-    dbsession: AsyncSession,
+        session: AsyncSession,
 ) -> FastAPI:
     """
     Fixture for creating FastAPI app.
@@ -91,20 +90,18 @@ def fastapi_app(
     :return: fastapi app with mocked dependencies.
     """
     application = get_app()
-    application.dependency_overrides[get_db_session] = lambda: dbsession
-    return application  # noqa: WPS331
+    application.dependency_overrides[get_db_session] = lambda: session
+    return application
 
 
+# noinspection PyUnusedLocal
 @pytest.fixture
 async def client(
-    fastapi_app: FastAPI,
-    anyio_backend: Any,
+        app: FastAPI,
+        backend: Any,
 ) -> AsyncGenerator[AsyncClient, None]:
     """
     Fixture that creates client for requesting server.
-
-    :param fastapi_app: the application.
-    :yield: client for the app.
     """
-    async with AsyncClient(app=fastapi_app, base_url="http://test") as ac:
-        yield ac
+    async with AsyncClient(app=app, base_url="http://test") as c:
+        yield c

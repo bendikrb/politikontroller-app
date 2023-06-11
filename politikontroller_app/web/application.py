@@ -22,7 +22,7 @@ def get_app() -> FastAPI:
     configure_logging()
     app = FastAPI(
         title="politikontroller_app",
-        version=metadata.version("politikontroller_app"),
+        version=metadata.version("politikontroller-app"),
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",

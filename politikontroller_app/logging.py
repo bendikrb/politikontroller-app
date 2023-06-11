@@ -1,10 +1,9 @@
 import logging
 import sys
-from typing import Union
 
 from loguru import logger
 
-from politikontroller_app.settings import settings
+from .settings import settings
 
 
 class InterceptHandler(logging.Handler):
@@ -25,7 +24,7 @@ class InterceptHandler(logging.Handler):
         :param record: record to log.
         """
         try:
-            level: Union[str, int] = logger.level(record.levelname).name
+            level: str | int = logger.level(record.levelname).name
         except ValueError:
             level = record.levelno
 

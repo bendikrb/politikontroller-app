@@ -2,9 +2,13 @@ import enum
 from pathlib import Path
 from tempfile import gettempdir
 
-from pydantic import BaseSettings
 from yarl import URL
+from pydantic import BaseSettings as PydanticBaseSettings
+from pydantic.env_settings import SettingsSourceCallable
+from pydantic.utils import deep_update
+from yaml import safe_load
 
+CONF_DIR = Path(Path(__file__).parent, "..", "config").resolve()
 TEMP_DIR = Path(gettempdir())
 
 
@@ -19,14 +23,7 @@ class LogLevel(str, enum.Enum):  # noqa: WPS600
     FATAL = "FATAL"
 
 
-class Settings(BaseSettings):
-    """
-    Application settings.
-
-    These parameters can be configured
-    with environment variables.
-    """
-
+class BaseSettings(PydanticBaseSettings):
     host: str = "127.0.0.1"
     port: int = 8000
     # quantity of workers for uvicorn
@@ -56,9 +53,46 @@ class Settings(BaseSettings):
         )
 
     class Config:
-        env_file = ".env"
-        env_prefix = "POLITIKONTROLLER_APP_"
-        env_file_encoding = "utf-8"
+        env_prefix = 'POLITI_'
+        config_files = [
+            Path(CONF_DIR, "global.yaml"),
+            Path(CONF_DIR, "dev.yaml"),
+        ]
+
+        @classmethod
+        def customise_sources(
+                cls,
+                init_settings: SettingsSourceCallable,
+                env_settings: SettingsSourceCallable,
+                file_secret_settings: SettingsSourceCallable
+        ) -> tuple[SettingsSourceCallable, ...]:
+            return init_settings, env_settings, config_file_settings
 
 
-settings = Settings()
+def config_file_settings(settings: PydanticBaseSettings) -> dict[str, any]:
+    config: dict[str, any] = {}
+    if not isinstance(settings, BaseSettings):
+        return config
+    for path in settings.Config.config_files:
+        if not path.is_file():
+            print(f"No file found at `{path.resolve()}`")
+            continue
+        print(f"Reading config file `{path.resolve()}`")
+        if path.suffix in {".yaml", ".yml"}:
+            config = deep_update(config, load_yaml(path))
+        else:
+            print(f"Unknown config file extension `{path.suffix}`")
+    return config
+
+
+def load_yaml(path: Path) -> dict[str, any]:
+    with Path(path).open("r") as f:
+        config = safe_load(f)
+    if not isinstance(config, dict):
+        raise TypeError(
+            f"Config file has no top-level mapping: {path}"
+        )
+    return config
+
+
+settings = BaseSettings()
