@@ -30,7 +30,7 @@ async def user_login(
 ):
     dao = Auth(db)
     try:
-        user = client.authenticate_user(47, int(form_data.username), form_data.password)
+        user = client.authenticate_user(form_data.username, form_data.password)
     except HTTPError as err:
         raise HTTPException(403, detail=str(err)) from err
     except AuthenticationError as err:
@@ -39,7 +39,7 @@ async def user_login(
     # user = User(**user_dict)
     token = dao.create_access_token(user.username, form_data.password)
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token.token, "token_type": "bearer"}
 
 
 @router.get("/settings")

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "politikontroller-app"
-version = "1.0.0"
+version = "1.0.1"
 description = ""
 authors = ["Bendik R. Brenne <bendik@konstant.no>"]
 license = "MIT"
@@ -24,7 +24,7 @@ pycryptodome = "^3.18.0"
 requests = "^2.31.0"
 python-multipart = "^0.0.6"
 geojson = "^3.0.1"
-politikontroller-py = "^1.0.0"
+politikontroller-py = "^1.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.3.2"
